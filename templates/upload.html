@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Resume Parser & JD Matcher</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background: #f8f9fa;
+      color: #212529;
+    }
+    form, .block {
+      margin-bottom: 1.5rem;
+    }
+    label {
+      font-weight: bold;
+    }
+    input[type="file"], textarea, input[type="text"] {
+      display: block;
+      width: 100%;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      margin-top: 0.5rem;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    pre {
+      background: #f0f0f0;
+      padding: 1rem;
+      border-radius: 6px;
+      max-width: 100%;
+      overflow-x: auto;
+    }
+    .error {
+      color: red;
+    }
+    .skills-container {
+      margin-top: 1rem;
+    }
+    .skills-container label {
+      margin-right: 1rem;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <h1>Upload Resume & Match with Job Description</h1>
+
+  <form id="uploadForm" enctype="multipart/form-data">
+    <label for="fileInput">Choose PDF Resume File:</label>
+    <input type="file" id="fileInput" accept=".pdf" required />
+    <button type="submit">Upload & Parse</button>
+  </form>
+
+  <div class="block">
+    <label for="jobTitle">Enter Job Title for Suggested Skills:</label>
+    <input type="text" id="jobTitle" placeholder="e.g., Data Scientist" />
+    <button type="button" id="suggestSkillsBtn">Suggest Skills</button>
+    <div id="suggestedSkills" class="skills-container"></div>
+    <button type="button" id="clearSkillsBtn" style="background-color: #6c757d;">Clear Selected Skills</button>
+  </div>
+
+  <div class="block">
+    <label for="jdText">Paste Job Description:</label>
+    <textarea id="jdText" rows="8" placeholder="Enter job description here..."></textarea>
+    <button id="matchBtn" type="button">Match Resume with JD</button>
+  </div>
+
+  <div id="status"></div>
+  <h3>Result</h3>
+  <pre id="result"></pre>
+
+  <script>
+    let parsedResume = null;
+
+    document.getElementById("uploadForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const file = document.getElementById("fileInput").files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      document.getElementById("status").textContent = "Parsing resume...";
+
+      const res = await fetch("/parse-resume", {
+        method: "POST",
+        body: formData,
+      });
+      const json = await res.json();
+      parsedResume = json;
+      document.getElementById("result").textContent = JSON.stringify(json, null, 2);
+      document.getElementById("status").textContent = "✅ Resume parsed.";
+    });
+
+    document.getElementById("suggestSkillsBtn").addEventListener("click", async () => {
+      const title = document.getElementById("jobTitle").value;
+      if (!title) return;
+      document.getElementById("status").textContent = "Fetching suggested skills...";
+
+      const res = await fetch("/suggest-skills", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ job_title: title })
+      });
+
+      const json = await res.json();
+      const container = document.getElementById("suggestedSkills");
+      container.innerHTML = "";
+      const jdBox = document.getElementById("jdText");
+
+      if (json.suggested_skills) {
+        jdBox.setAttribute("data-base", jdBox.value);
+        json.suggested_skills.forEach(skill => {
+          const label = document.createElement("label");
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.name = "skills";
+          checkbox.value = skill;
+          checkbox.addEventListener("change", () => {
+            const base = jdBox.getAttribute("data-base") || "";
+            const checkedSkills = Array.from(document.querySelectorAll("input[name='skills']:checked")).map(cb => cb.value);
+            jdBox.value = base + "\n\n" + "Confirmed required skills: " + checkedSkills.join(", ");
+          });
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(" " + skill));
+          container.appendChild(label);
+        });
+        document.getElementById("status").textContent = "✅ Suggested skills loaded.";
+      } else {
+        document.getElementById("status").textContent = "❌ Failed to load skills.";
+      }
+    });
+
+    document.getElementById("clearSkillsBtn").addEventListener("click", () => {
+      const checkboxes = document.querySelectorAll("input[name='skills']:checked");
+      checkboxes.forEach(cb => cb.checked = false);
+      const jdTextarea = document.getElementById("jdText");
+      const baseJD = jdTextarea.getAttribute("data-base") || jdTextarea.value;
+      jdTextarea.value = baseJD;
+    });
+
+document.getElementById("matchBtn").addEventListener("click", async () => {
+  const jdText = document.getElementById("jdText").value;
+  if (!parsedResume || !jdText) return;
+
+  const confirmed_skills = Array.from(document.querySelectorAll("input[name='skills']:checked")).map(cb => cb.value);
+
+  document.getElementById("status").textContent = "Matching with JD...";
+
+  const res = await fetch("/match-jd", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      resume: parsedResume,
+      jd: jdText,
+      confirmed_skills
+    })
+  });
+
+  const json = await res.json();
+
+  if (json.error) {
+    document.getElementById("result").textContent = JSON.stringify(json, null, 2);
+    document.getElementById("status").textContent = "❌ Matching failed.";
+    return;
+  }
+
+  // 美化展示匹配结果
+  const formatted = `
+🔎 Match Summary: ${json.summary}
+📊 Match Score: ${json.match_score}/100
+
+✅ Matched Skills:
+${json.matched_skills?.map(s => "  - " + s).join("\n") || "  (None)"}
+
+❌ Missing Skills:
+${json.missing_skills?.map(s => "  - " + s).join("\n") || "  (None)"}
+`;
+
+  document.getElementById("result").textContent = formatted;
+  document.getElementById("status").textContent = "✅ Matching complete.";
+});
+
+  </script>
+</body>
+</html>

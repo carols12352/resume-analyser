@@ -1,0 +1,5 @@
+flask
+dotenv
+openai>=1.0.0
+pdfplumber
+werkzeug

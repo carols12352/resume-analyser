@@ -1,0 +1,16 @@
+resume-analyzer-backend/
+├── app/                        # 主应用目录
+│   ├── __init__.py             # 创建 Flask 实例
+│   ├── routes.py               # 所有 API 路由定义
+│   ├── resume_parser.py        # 提取 PDF 简历中的结构化信息
+│   ├── jd_matcher.py           # 简历和职位 JD 匹配度分析
+│   ├── scorer.py               # 根据规则进行打分
+│   ├── gpt_feedback.py         # 调用 OpenAI API 返回优化建议
+│   ├── utils.py                # 公用函数（如清洗文本、正则提取）
+│
+├── uploads/                    # 临时保存上传的 PDF 简历
+│
+├── requirements.txt            # Python依赖包列表
+├── config.py                   # 配置项（OpenAI key、路径等）
+├── run.py                      # 启动 Flask 服务的入口文件
+└── README.md                   # 项目说明
