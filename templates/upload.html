@@ -70,8 +70,11 @@
     <input type="text" id="jobTitle" placeholder="e.g., Data Scientist" />
     <button type="button" id="suggestSkillsBtn">Suggest Skills</button>
     <div id="suggestedSkills" class="skills-container"></div>
-    <button type="button" id="clearSkillsBtn" style="background-color: #6c757d;">Clear Selected Skills</button>
   </div>
+
+  <div class="block">
+  <button id="getFeedbackBtn" type="button">Get Feedback</button>
+</div>
 
   <div class="block">
     <label for="jdText">Paste Job Description:</label>
@@ -100,6 +103,7 @@
         method: "POST",
         body: formData,
       });
+
       const json = await res.json();
       parsedResume = json;
       document.getElementById("result").textContent = JSON.stringify(json, null, 2);
@@ -107,93 +111,125 @@
     });
 
     document.getElementById("suggestSkillsBtn").addEventListener("click", async () => {
-      const title = document.getElementById("jobTitle").value;
-      if (!title) return;
-      document.getElementById("status").textContent = "Fetching suggested skills...";
+  const title = document.getElementById("jobTitle").value;
+  if (!title) return;
+  document.getElementById("status").textContent = "Fetching suggested skills...";
 
-      const res = await fetch("/suggest-skills", {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ job_title: title })
-      });
-
-      const json = await res.json();
-      const container = document.getElementById("suggestedSkills");
-      container.innerHTML = "";
-      const jdBox = document.getElementById("jdText");
-
-      if (json.suggested_skills) {
-        jdBox.setAttribute("data-base", jdBox.value);
-        json.suggested_skills.forEach(skill => {
-          const label = document.createElement("label");
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.name = "skills";
-          checkbox.value = skill;
-          checkbox.addEventListener("change", () => {
-            const base = jdBox.getAttribute("data-base") || "";
-            const checkedSkills = Array.from(document.querySelectorAll("input[name='skills']:checked")).map(cb => cb.value);
-            jdBox.value = base + "\n\n" + "Confirmed required skills: " + checkedSkills.join(", ");
-          });
-          label.appendChild(checkbox);
-          label.appendChild(document.createTextNode(" " + skill));
-          container.appendChild(label);
-        });
-        document.getElementById("status").textContent = "✅ Suggested skills loaded.";
-      } else {
-        document.getElementById("status").textContent = "❌ Failed to load skills.";
-      }
-    });
-
-    document.getElementById("clearSkillsBtn").addEventListener("click", () => {
-      const checkboxes = document.querySelectorAll("input[name='skills']:checked");
-      checkboxes.forEach(cb => cb.checked = false);
-      const jdTextarea = document.getElementById("jdText");
-      const baseJD = jdTextarea.getAttribute("data-base") || jdTextarea.value;
-      jdTextarea.value = baseJD;
-    });
-
-document.getElementById("matchBtn").addEventListener("click", async () => {
-  const jdText = document.getElementById("jdText").value;
-  if (!parsedResume || !jdText) return;
-
-  const confirmed_skills = Array.from(document.querySelectorAll("input[name='skills']:checked")).map(cb => cb.value);
-
-  document.getElementById("status").textContent = "Matching with JD...";
-
-  const res = await fetch("/match-jd", {
+  const res = await fetch("/suggest-skills", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      resume: parsedResume,
-      jd: jdText,
-      confirmed_skills
-    })
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ job_title: title })
   });
 
   const json = await res.json();
+  const container = document.getElementById("suggestedSkills");
+  container.innerHTML = "";
+  const jdBox = document.getElementById("jdText");
 
-  if (json.error) {
-    document.getElementById("result").textContent = JSON.stringify(json, null, 2);
-    document.getElementById("status").textContent = "❌ Matching failed.";
-    return;
+  if (json.suggested_skills) {
+    jdBox.setAttribute("data-base", jdBox.value);
+    json.suggested_skills.forEach(skill => {
+      const label = document.createElement("label");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.name = "skills";
+      checkbox.value = skill;
+      checkbox.addEventListener("change", () => {
+        const base = jdBox.getAttribute("data-base") || "";
+        const checkedSkills = Array.from(document.querySelectorAll("input[name='skills']:checked")).map(cb => cb.value);
+        jdBox.value = base + "\n\n" + "Confirmed required skills: " + checkedSkills.join(", ");
+      });
+      label.appendChild(checkbox);
+      label.appendChild(document.createTextNode(" " + skill));
+      container.appendChild(label);
+    });
+    document.getElementById("status").textContent = "✅ Suggested skills loaded.";
+  } else {
+    document.getElementById("status").textContent = "❌ Failed to load skills.";
   }
+});
 
-  // 美化展示匹配结果
-  const formatted = `
+
+    document.getElementById("matchBtn").addEventListener("click", async () => {
+      const jdText = document.getElementById("jdText").value;
+      if (!parsedResume || !jdText) return;
+
+      const confirmed_skills = Array.from(document.querySelectorAll("input[name='skills']:checked")).map(cb => cb.value);
+
+      document.getElementById("status").textContent = "Matching with JD...";
+
+      const res = await fetch("/match-jd", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          resume: parsedResume,
+          jd: jdText,
+          confirmed_skills
+        })
+      });
+
+      const json = await res.json();
+
+      if (json.error) {
+        document.getElementById("result").textContent = JSON.stringify(json, null, 2);
+        document.getElementById("status").textContent = "❌ Matching failed.";
+        return;
+      }
+
+      // 美化展示匹配结果
+      const formatted = `
 🔎 Match Summary: ${json.summary}
-📊 Match Score: ${json.match_score}/100
+📊 GPT Score: ${json.gpt_score}/100
+🧠 Final Score (Weighted): ${json.final_score}/100
 
 ✅ Matched Skills:
 ${json.matched_skills?.map(s => "  - " + s).join("\n") || "  (None)"}
 
 ❌ Missing Skills:
 ${json.missing_skills?.map(s => "  - " + s).join("\n") || "  (None)"}
+
+📐 Dimension Scores:
+${json.dimensions ? Object.entries(json.dimensions).map(([key, val]) => `  - ${key}: ${val}`).join("\n") : "  (None)"}
 `;
 
-  document.getElementById("result").textContent = formatted;
-  document.getElementById("status").textContent = "✅ Matching complete.";
+      document.getElementById("result").textContent = formatted;
+      document.getElementById("status").textContent = "✅ Matching complete.";
+    });
+
+document.getElementById("getFeedbackBtn").addEventListener("click", async () => {
+  if (!parsedResume) return;
+  document.getElementById("status").textContent = "Generating feedback...";
+
+  const res = await fetch("/get-feedback", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ resume: parsedResume })
+  });
+
+  const json = await res.json();
+  if (json.success) {
+    const { strengths, suggestions } = json.data;
+
+    let suggestionText = suggestions.map(s =>
+      `🔧 *${s.issue}*\n🧠 Recommendation: ${s.recommendation}\n💡 Example: ${s.example}\n🌐 Resource: ${s.resource}`
+    ).join("\n\n");
+
+    document.getElementById("result").textContent = `
+💪 Strengths:
+${strengths.map(s => "  - " + s).join("\n")}
+
+🛠️ Suggestions:
+${suggestionText}
+    `;
+    document.getElementById("status").textContent = "✅ Feedback ready.";
+  } else {
+    document.getElementById("status").textContent = "❌ Failed to get feedback.";
+    document.getElementById("result").textContent = JSON.stringify(json, null, 2);
+  }
 });
+
 
   </script>
 </body>
