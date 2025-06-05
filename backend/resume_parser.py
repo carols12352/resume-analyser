@@ -1,14 +1,10 @@
 import json
 import re
 import pdfplumber
-from openai import OpenAI
 from backend import get_client
 
-
-# 初始化 OpenAI 客户端（新版本写法）
+# 初始化 OpenAI 客户端
 client = get_client()
-
-# -------------------- 核心文本提取 --------------------
 
 def extract_text_from_pdf(file_path):
     """从 PDF 提取全文文本"""
@@ -21,13 +17,25 @@ def extract_text_from_pdf(file_path):
     return text.strip()
 
 
-# -------------------- 主函数：GPT 解析简历 --------------------
-
-def parse_resume(file_path,lang="en"):
+def parse_resume(file_path, lang="en"):
+    """
+    使用 GPT 分析 PDF 简历，返回结构化 JSON，支持多语言输出
+    """
     text = extract_text_from_pdf(file_path)
-    language_name = {"zh": "Chinese", "en": "English", "fr": "French"}.get(lang, "English")
+
+    language_name = {
+        "zh": "Chinese",
+        "en": "English",
+        "fr": "French"
+    }.get(lang, "English")
+
     prompt = f"""
-You are a professional resume parser. Please extract structured information from the following resume text and return a clean JSON in English, using the format below:
+You are a professional multilingual resume parser.
+
+Your task is to extract structured information from the following resume text and output a valid JSON in {language_name}. 
+If the resume content is not written in {language_name}, you must translate all entries into {language_name}.
+
+The output must strictly follow this JSON format:
 
 {{
   "name": "Full name (if present, else empty string)",
@@ -39,39 +47,41 @@ You are a professional resume parser. Please extract structured information from
 }}
 
 Rules:
-- Output must be valid JSON only — no explanations, no comments.
+- Output valid JSON only — no explanations or comments.
 - All fields must be present even if empty.
-- Try to preserve important original details (names of schools, companies, skill terms).
-- Keep the final result concise: use under 1000 characters total if possible.
-- Your answer should be in the following language: {language_name}
-- Do not hallucinate — only extract what’s present in the text.
-- If multiple entries exist (e.g. education or experience), only pick the most relevant ones(up to 5).
+- Do not invent content — extract only what is actually present.
+- Translate content into {language_name} if necessary.
+- Keep the total output concise — under 1000 characters if possible.
+- Return at most 5 entries for education and experience each.
 
 Resume text:
 {text}
 """
 
-    # GPT-3.5 新接口调用方式
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You are an expert resume parser."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.2,
-        max_tokens=1000
-    )
-
-    content = response.choices[0].message.content
-
-    # 尝试解析为 JSON
     try:
-        return json.loads(content)
-    except json.JSONDecodeError:
-        match = re.search(r"\{[\s\S]+\}", content)
-        if match:
-            try:
-                return json.loads(match.group(0))
-            except Exception as e:
-                return {"error": f"JSON fallback failed: {str(e)}", "raw": content}
-        return {"error": "No valid JSON found in GPT response", "raw": content}
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are an expert in multilingual resume parsing."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.2,
+            max_tokens=1000
+        )
+
+        content = response.choices[0].message.content.strip()
+
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError:
+            match = re.search(r"\{[\s\S]+\}", content)
+            if match:
+                try:
+                    return json.loads(match.group(0))
+                except Exception as e:
+                    return {"error": f"JSON fallback failed: {str(e)}", "raw": content}
+            return {"error": "No valid JSON found in GPT response", "raw": content}
+
+    except Exception as e:
+        return {"error": f"Unexpected error during resume parsing: {str(e)}"}
+
