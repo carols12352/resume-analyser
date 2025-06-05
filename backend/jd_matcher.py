@@ -7,10 +7,11 @@ client = get_client()
 
 # ----------------- Job-Resume 匹配函数 -----------------
 
-def match_resume_with_jd(resume_data: dict, jd_text: str, confirmed_skills: list = None):
+def match_resume_with_jd(resume_data: dict, jd_text: str, confirmed_skills: list = None,lang = "en"):
     """
     使用 GPT 分析简历和 JD 的匹配度，返回结构化评分结果，包括维度细分。
     """
+    language_name = {"zh": "Chinese", "en": "English", "fr": "French"}.get(lang, "English")
     if len(jd_text) > 3000:
         jd_text = jd_text[:3000] + "..."
 
@@ -20,6 +21,7 @@ def match_resume_with_jd(resume_data: dict, jd_text: str, confirmed_skills: list
 
     prompt = f"""
 You are a job matching expert. Given a resume and job description, analyze their compatibility across key aspects and return the result in JSON format.
+Your answer should be in the following language: {language_name}
 
 Format:
 {{
@@ -77,12 +79,14 @@ missing skills should be the ones missing from the skill hints only
 
 # ----------------- 职位推荐技能函数 -----------------
 
-def suggest_skills_for_title(job_title: str):
+def suggest_skills_for_title(job_title: str,lang="en"):
     """
     给定职位名称，返回 GPT 推荐的常见技能（最多 10 个）
     """
+    language_name = {"zh": "Chinese", "en": "English", "fr": "French"}.get(lang, "English")
     prompt = f"""
 You are a career expert. List 5–10 technical or soft skills commonly expected for the role of "{job_title}".
+Your answer should be in the following language: {language_name}
 Return only a JSON array, e.g.: ["Skill1", "Skill2"]
 """
 

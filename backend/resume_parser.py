@@ -23,9 +23,9 @@ def extract_text_from_pdf(file_path):
 
 # -------------------- 主函数：GPT 解析简历 --------------------
 
-def parse_resume(file_path):
+def parse_resume(file_path,lang="en"):
     text = extract_text_from_pdf(file_path)
-
+    language_name = {"zh": "Chinese", "en": "English", "fr": "French"}.get(lang, "English")
     prompt = f"""
 You are a professional resume parser. Please extract structured information from the following resume text and return a clean JSON in English, using the format below:
 
@@ -43,7 +43,7 @@ Rules:
 - All fields must be present even if empty.
 - Try to preserve important original details (names of schools, companies, skill terms).
 - Keep the final result concise: use under 1000 characters total if possible.
-- Translate or rephrase into English if the original text is in another language.
+- Your answer should be in the following language: {language_name}
 - Do not hallucinate — only extract what’s present in the text.
 - If multiple entries exist (e.g. education or experience), only pick the most relevant ones(up to 5).
 

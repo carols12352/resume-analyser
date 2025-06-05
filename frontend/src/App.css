@@ -1,0 +1,614 @@
+/* 全局样式变量 */
+:root {
+  --primary-color: #2563eb;
+  --primary-hover: #1d4ed8;
+  --secondary-color: #64748b;
+  --success-color: #22c55e;
+  --error-color: #ef4444;
+  --warning-color: #f59e0b;
+  --background-color: #f8fafc;
+  --surface-color: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --border-radius: 8px;
+  --transition: all 0.3s ease;
+}
+
+/* 基础重置样式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* 应用主体布局 */
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* 应用头部 */
+.app-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.app-header h1 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.status-bar {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border-radius: var(--border-radius);
+  background-color: var(--surface-color);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  display: inline-block;
+}
+
+.status-bar:empty {
+  display: none;
+}
+
+/* 导航栏 */
+.app-nav {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.app-nav button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--border-radius);
+  background: #f5f5f5;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.app-nav button:hover {
+  background: #e0e0e0;
+}
+
+.app-nav button.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* 主要内容区域 */
+.app-content {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 章节标题 */
+section h2 {
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* 表单组件 */
+.form-group {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+input[type="text"],
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+  font-family: inherit;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+input[type="file"] {
+  width: 100%;
+  padding: 1rem;
+  background-color: var(--surface-color);
+  border: 2px dashed var(--border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+input[type="file"]:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(37, 99, 235, 0.05);
+}
+
+input[type="file"]::file-selector-button {
+  padding: 0.5rem 1rem;
+  margin-right: 1rem;
+  border: none;
+  border-radius: var(--border-radius);
+  background-color: var(--primary-color);
+  color: white;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background-color: var(--primary-hover);
+}
+
+/* 按钮样式 */
+button {
+  padding: 0.75rem 1.5rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+button:hover {
+  background: var(--primary-hover);
+}
+
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* 错误消息组件 */
+.error-message {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  margin: 1rem 0;
+  background-color: #fff3f3;
+  border: 1px solid #ffcdd2;
+  border-radius: var(--border-radius);
+  color: var(--error-color);
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.error-icon {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+}
+
+.error-message p {
+  color: var(--text-primary);
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* 上传提示 */
+.upload-hint {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: #f5f5f5;
+  border-radius: var(--border-radius);
+  color: var(--text-secondary);
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.upload-hint p {
+  margin: 0.5rem 0;
+}
+
+/* 简历显示组件 */
+.resume-display {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: var(--background-color);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.resume-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* 技能网格 */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.skill-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #f5f5f5;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.skill-item:hover {
+  background: #e0e0e0;
+}
+
+.skill-item input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* 页面特定样式 */
+.upload-section {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.match-section {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.feedback-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.generate-feedback-btn {
+  font-size: 1.1rem;
+  padding: 1rem 2rem;
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.1);
+}
+
+/* 结果显示区域 */
+.result-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: var(--surface-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 匹配结果样式 */
+.match-result {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.match-summary {
+  background: var(--background-color);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 1.5rem;
+}
+
+.score-section {
+  display: flex;
+  gap: 2rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+
+.skills-section {
+  margin: 1.5rem 0;
+}
+
+.skills-section h4 {
+  color: var(--text-primary);
+  margin: 1rem 0 0.5rem 0;
+}
+
+.skills-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+}
+
+.skills-section li {
+  margin: 0.25rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  color: var(--text-secondary);
+}
+
+.skills-section li::before {
+  content: "•";
+  position: absolute;
+  left: 0.5rem;
+  color: var(--primary-color);
+}
+
+.dimensions {
+  margin-top: 1.5rem;
+}
+
+.dimensions h4 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.dimensions p {
+  margin: 0.5rem 0;
+  color: var(--text-secondary);
+}
+
+/* 反馈网格布局 */
+.feedback-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.strengths-grid,
+.suggestions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* 优势卡片组件 */
+.strength-card {
+  background: linear-gradient(135deg, #f1f8ff, #e3f2fd);
+  border: 1px solid #b3e0ff;
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  transition: var(--transition);
+  animation: slideIn 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+.strength-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.strength-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.strength-icon {
+  font-size: 1.5rem;
+}
+
+.strength-content p {
+  margin: 0;
+  color: var(--text-primary);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* 建议卡片组件 */
+.suggestion-card {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: var(--transition);
+  border-left: 4px solid var(--warning-color);
+  animation: slideIn 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+.suggestion-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.suggestion-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.suggestion-icon {
+  font-size: 1.5rem;
+}
+
+.suggestion-header h4 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.suggestion-content {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.suggestion-content p {
+  margin: 0.5rem 0;
+}
+
+.suggestion-content strong {
+  color: var(--text-primary);
+  margin-right: 0.5rem;
+}
+
+.suggestion-content a {
+  color: var(--primary-color);
+  text-decoration: none;
+  word-break: break-all;
+  transition: var(--transition);
+}
+
+.suggestion-content a:hover {
+  text-decoration: underline;
+  color: var(--primary-hover);
+}
+
+/* 动画效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 动画延迟 */
+.strengths-grid .strength-card:nth-child(1) { animation-delay: 0.1s; }
+.strengths-grid .strength-card:nth-child(2) { animation-delay: 0.2s; }
+.strengths-grid .strength-card:nth-child(3) { animation-delay: 0.3s; }
+.strengths-grid .strength-card:nth-child(4) { animation-delay: 0.4s; }
+
+.suggestions-grid .suggestion-card:nth-child(1) { animation-delay: 0.1s; }
+.suggestions-grid .suggestion-card:nth-child(2) { animation-delay: 0.2s; }
+.suggestions-grid .suggestion-card:nth-child(3) { animation-delay: 0.3s; }
+.suggestions-grid .suggestion-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .app {
+    padding: 1rem;
+  }
+
+  .app-nav {
+    flex-direction: column;
+    padding: 0.5rem;
+  }
+
+  .app-nav button {
+    width: 100%;
+  }
+
+  .app-content {
+    padding: 1rem;
+  }
+
+  .skills-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .score-section {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .strengths-grid,
+  .suggestions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .feedback-section {
+    padding: 1rem;
+  }
+
+  .error-message {
+    flex-direction: column;
+    text-align: center;
+    padding: 0.75rem;
+  }
+
+  .upload-hint {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .strength-card,
+  .suggestion-card {
+    padding: 1rem;
+  }
+}
+
+/* 可访问性增强 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  :root {
+    --border-color: #000000;
+    --text-secondary: #000000;
+  }
+}
