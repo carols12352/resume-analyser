@@ -107,10 +107,10 @@ Return only a JSON array, e.g.: ["Skill1", "Skill2"]
             skills = json.loads(content)
         except json.JSONDecodeError:
             match = re.search(r"\[.*\]", content, re.DOTALL)
-        if match:
-            skills = json.loads(match.group(0))
-        else:
-            raise
+            if match:
+                skills = json.loads(match.group(0))
+            else:
+                raise
 
 
         if isinstance(skills, list):
