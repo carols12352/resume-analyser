@@ -3,7 +3,8 @@
 [English](README.md) | [简体中文](README_CN.md)
 
 ## Overview
-Upload a PDF resume and use GPT to parse it, match jobs, and provide feedback.
+- A bilingual(Chinese & English) PDF resume anaylser 
+- Upload a PDF resume and use GPT to parse it, match jobs, and provide feedback.
 
 ## Quick Start
 1. Copy `.envtemp` to `.env` and fill in `OPENAI_API_KEY` and `OPENAI_URL`.
